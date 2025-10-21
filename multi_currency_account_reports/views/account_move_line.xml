@@ -7,7 +7,7 @@
             <field name="inherit_id" ref="account.view_move_line_pivot"/>
             <field name="arch" type="xml">
                 <xpath expr="//field[@name='balance']" position="after">
-                    <field name="amount_currency" type="measure" widget="float"/>
+                    <field name="amount_currency" type="measure" sum="amount_currency" widget="monetary"/>
                 </xpath>
             </field>
         </record>
