@@ -16,42 +16,71 @@ class AccountMoveLine(models.Model):
         for rec in self:
           if rec.custom_rate == 0:
             conversion_rate = 1
-            if rec.debit and rec.company_currency_id2 and rec.currency_id and rec.amount_currency and (rec.move_id.invoice_date or rec.move_id.date):
-                main_currency = self.env.company.currency_id
+            main_currency = self.env.company.currency_id
+            to_currency = self.env.company.currency_id2
+            date = rec.move_id.invoice_date or rec.move_id.date
+            if rec.debit and rec.company_currency_id2 and rec.currency_id and (rec.move_id.invoice_date or rec.move_id.date):
                 from_currency = rec.currency_id
-                to_currency = self.env.company.currency_id2
-                if from_currency.id == to_currency.id:
-                    conversion_rate = rec.debit / abs(rec.amount_currency)
-                    rec.debit2 = abs(rec.amount_currency)
-                else:
-                    if rec.move_id.asset_id:
-                        conversion_rate = self.env['res.currency']._get_conversion_rate(
-                            to_currency, main_currency, self.env.company, rec.move_id.asset_id.acquisition_date
-                        )
-                        rec.debit2 = rec.debit / conversion_rate
+                if rec.amount_currency:
+                    if from_currency.id == to_currency.id:
+                        conversion_rate = rec.debit / abs(rec.amount_currency)
+                        rec.debit2 = abs(rec.amount_currency)
                     else:
-                        conversion_rate = self.env['res.currency']._get_conversion_rate(
-                            to_currency, main_currency, self.env.company, rec.move_id.invoice_date or rec.move_id.date
-                        )
+                        if rec.move_id.asset_id:
+                            conversion_rate = self.env['res.currency']._get_conversion_rate(
+                                to_currency, main_currency, self.env.company, rec.move_id.asset_id.acquisition_date
+                            )
+                        else:
+                            conversion_rate = self.env['res.currency']._get_conversion_rate(
+                                to_currency, main_currency, self.env.company, date
+                            )
+                        rec.debit2 = rec.debit / conversion_rate
+                else:
+                    # Line in company currency
+                    if main_currency.id == to_currency.id:
+                        conversion_rate = 1
+                        rec.debit2 = rec.debit
+                    else:
+                        if rec.move_id.asset_id:
+                            conversion_rate = self.env['res.currency']._get_conversion_rate(
+                                to_currency, main_currency, self.env.company, rec.move_id.asset_id.acquisition_date
+                            )
+                        else:
+                            conversion_rate = self.env['res.currency']._get_conversion_rate(
+                                to_currency, main_currency, self.env.company, date
+                            )
                         rec.debit2 = rec.debit / conversion_rate
                 rec.conversion_rate = conversion_rate
-            if rec.credit and rec.company_currency_id2 and rec.currency_id and rec.amount_currency and (rec.move_id.invoice_date or rec.move_id.date):
-                main_currency = self.env.company.currency_id
+            if rec.credit and rec.company_currency_id2 and rec.currency_id and (rec.move_id.invoice_date or rec.move_id.date):
                 from_currency = rec.currency_id
-                to_currency = self.env.company.currency_id2
-                if from_currency.id == to_currency.id:
-                    conversion_rate = rec.credit / abs(rec.amount_currency)
-                    rec.credit2 = abs(rec.amount_currency)
-                else:
-                    if rec.move_id.asset_id:
-                        conversion_rate = self.env['res.currency']._get_conversion_rate(
-                            to_currency, main_currency, self.env.company, rec.move_id.asset_id.acquisition_date
-                        )
-                        rec.credit2 = rec.credit / conversion_rate
+                if rec.amount_currency:
+                    if from_currency.id == to_currency.id:
+                        conversion_rate = rec.credit / abs(rec.amount_currency)
+                        rec.credit2 = abs(rec.amount_currency)
                     else:
-                        conversion_rate = self.env['res.currency']._get_conversion_rate(
-                            to_currency, main_currency, self.env.company, rec.move_id.invoice_date or rec.move_id.date
-                        )
+                        if rec.move_id.asset_id:
+                            conversion_rate = self.env['res.currency']._get_conversion_rate(
+                                to_currency, main_currency, self.env.company, rec.move_id.asset_id.acquisition_date
+                            )
+                        else:
+                            conversion_rate = self.env['res.currency']._get_conversion_rate(
+                                to_currency, main_currency, self.env.company, date
+                            )
+                        rec.credit2 = rec.credit / conversion_rate
+                else:
+                    # Line in company currency
+                    if main_currency.id == to_currency.id:
+                        conversion_rate = 1
+                        rec.credit2 = rec.credit
+                    else:
+                        if rec.move_id.asset_id:
+                            conversion_rate = self.env['res.currency']._get_conversion_rate(
+                                to_currency, main_currency, self.env.company, rec.move_id.asset_id.acquisition_date
+                            )
+                        else:
+                            conversion_rate = self.env['res.currency']._get_conversion_rate(
+                                to_currency, main_currency, self.env.company, date
+                            )
                         rec.credit2 = rec.credit / conversion_rate
                 rec.conversion_rate = conversion_rate
           else:

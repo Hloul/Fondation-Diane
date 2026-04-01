@@ -195,8 +195,8 @@ class PartnerLedgerMultiCurrencyCustomHandler(models.AbstractModel):
                     %s                                                                                    AS column_group_key,
                     SUM(ROUND(account_move_line.debit * currency_table.rate, currency_table.precision))   AS debit,
                     SUM(ROUND(account_move_line.credit * currency_table.rate, currency_table.precision))  AS credit,
-                    SUM(ROUND(account_move_line.debit2 * currency_table.rate, currency_table.precision))   AS debit2,
-                    SUM(ROUND(account_move_line.credit2 * currency_table.rate, currency_table.precision))  AS credit2,
+                    SUM(ROUND(account_move_line.debit2, currency_table.precision))                        AS debit2,
+                    SUM(ROUND(account_move_line.credit2, currency_table.precision))                       AS credit2,
                     SUM(ROUND(account_move_line.balance * currency_table.rate, currency_table.precision)) AS balance
                 FROM {tables}
                 LEFT JOIN {ct_query} ON currency_table.company_id = account_move_line.company_id
@@ -224,8 +224,8 @@ class PartnerLedgerMultiCurrencyCustomHandler(models.AbstractModel):
                     %s                                                                                    AS column_group_key,
                     SUM(ROUND(account_move_line.debit * currency_table.rate, currency_table.precision))   AS debit,
                     SUM(ROUND(account_move_line.credit * currency_table.rate, currency_table.precision))  AS credit,
-                    SUM(ROUND(account_move_line.debit2 * currency_table.rate, currency_table.precision))   AS debit2,
-                    SUM(ROUND(account_move_line.credit2 * currency_table.rate, currency_table.precision))  AS credit2,
+                    SUM(ROUND(account_move_line.debit2, currency_table.precision))                        AS debit2,
+                    SUM(ROUND(account_move_line.credit2, currency_table.precision))                       AS credit2,
                     SUM(ROUND(account_move_line.balance * currency_table.rate, currency_table.precision)) AS balance
                 FROM {tables}
                 LEFT JOIN {ct_query} ON currency_table.company_id = account_move_line.company_id
@@ -275,8 +275,8 @@ class PartnerLedgerMultiCurrencyCustomHandler(models.AbstractModel):
                     aml_with_partner.partner_id                                                                           AS groupby,
                     COALESCE(SUM(CASE WHEN aml_with_partner.balance > 0 THEN 0 ELSE partial.amount END), 0)               AS debit,
                     COALESCE(SUM(CASE WHEN aml_with_partner.balance < 0 THEN 0 ELSE partial.amount END), 0)               AS credit,
-                    COALESCE(SUM(CASE WHEN aml_with_partner.balance > 0 THEN 0 ELSE partial.amount END), 0)               AS debit2,
-                    COALESCE(SUM(CASE WHEN aml_with_partner.balance < 0 THEN 0 ELSE partial.amount END), 0)               AS credit2,
+                    COALESCE(SUM(CASE WHEN aml_with_partner.balance > 0 THEN partial.amount * aml_with_partner.debit2 / NULLIF(aml_with_partner.debit, 0) ELSE 0 END), 0) AS debit2,
+                    COALESCE(SUM(CASE WHEN aml_with_partner.balance < 0 THEN partial.amount * aml_with_partner.credit2 / NULLIF(aml_with_partner.credit, 0) ELSE 0 END), 0) AS credit2,
                     COALESCE(SUM(CASE WHEN aml_with_partner.balance > 0 THEN -partial.amount ELSE partial.amount END), 0) AS balance
                 FROM {tables}
                 JOIN account_partial_reconcile partial
@@ -405,8 +405,8 @@ class PartnerLedgerMultiCurrencyCustomHandler(models.AbstractModel):
                     account_move_line.matching_number,
                     ROUND(account_move_line.debit * currency_table.rate, currency_table.precision)   AS debit,
                     ROUND(account_move_line.credit * currency_table.rate, currency_table.precision)  AS credit,
-                    ROUND(account_move_line.debit2 * currency_table.rate, currency_table.precision)   AS debit2,
-                    ROUND(account_move_line.credit2 * currency_table.rate, currency_table.precision)  AS credit2,
+                    ROUND(account_move_line.debit2, currency_table.precision)                        AS debit2,
+                    ROUND(account_move_line.credit2, currency_table.precision)                       AS credit2,
                     ROUND(account_move_line.balance * currency_table.rate, currency_table.precision) AS balance,
                     account_move.name                                                                AS move_name,
                     account_move.move_type                                                           AS move_type,
@@ -444,8 +444,8 @@ class PartnerLedgerMultiCurrencyCustomHandler(models.AbstractModel):
                     account_move_line.matching_number,
                     CASE WHEN aml_with_partner.balance > 0 THEN 0 ELSE partial.amount END               AS debit,
                     CASE WHEN aml_with_partner.balance < 0 THEN 0 ELSE partial.amount END               AS credit,
-                    CASE WHEN aml_with_partner.balance > 0 THEN 0 ELSE partial.amount END               AS debit2,
-                    CASE WHEN aml_with_partner.balance < 0 THEN 0 ELSE partial.amount END               AS credit2,
+                    CASE WHEN aml_with_partner.balance > 0 THEN partial.amount * aml_with_partner.debit2 / NULLIF(aml_with_partner.debit, 0) ELSE 0 END AS debit2,
+                    CASE WHEN aml_with_partner.balance < 0 THEN partial.amount * aml_with_partner.credit2 / NULLIF(aml_with_partner.credit, 0) ELSE 0 END AS credit2,
                     CASE WHEN aml_with_partner.balance > 0 THEN -partial.amount ELSE partial.amount END AS balance,
                     account_move.name                                                                   AS move_name,
                     account_move.move_type                                                              AS move_type,
