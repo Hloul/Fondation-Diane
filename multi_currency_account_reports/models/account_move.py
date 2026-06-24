@@ -85,8 +85,8 @@ class AccountMoveLine(models.Model):
                 rec.conversion_rate = conversion_rate
           else:
             rec.conversion_rate = rec.custom_rate   
-            rec.credit2 = rec.credit / rec.conversion_rate
-            rec.debit2 = rec.debit / rec.conversion_rate
+            rec.credit2 = rec.credit / rec.conversion_rate if rec.conversion_rate else 0
+            rec.debit2 = rec.debit / rec.conversion_rate if rec.conversion_rate else 0
 
  
 
