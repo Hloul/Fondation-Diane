@@ -7,14 +7,14 @@ class AccountMoveLine(models.Model):
 
     company_currency_id2 = fields.Many2one(string='Second Company Currency', related='company_id.currency_id2',readonly=True, store=True)
     conversion_rate = fields.Float(string='Conversion Rate', compute='_compute_conversion_rate', inverse='_inverse_conversion_rate')
-    custom_rate = fields.Float(string='Custom Rate', default=0)
+    custom_rate = fields.Float(string='Custom Rate', default=-1)
     debit2 = fields.Monetary(string='Debit2', currency_field='company_currency_id2', default=0)
     credit2 = fields.Monetary(string='Credit2', currency_field='company_currency_id2', default=0)
 
-    @api.depends('amount_currency','date','currency_id','debit','credit')
+    @api.depends('amount_currency','date','currency_id','debit','credit','custom_rate')
     def _compute_conversion_rate(self):
         for rec in self:
-          if rec.custom_rate == 0:
+          if rec.custom_rate == -1:
             conversion_rate = 1
             main_currency = self.env.company.currency_id
             to_currency = self.env.company.currency_id2
@@ -84,7 +84,12 @@ class AccountMoveLine(models.Model):
                         rec.credit2 = rec.credit / conversion_rate
                 rec.conversion_rate = conversion_rate
           else:
-            rec.conversion_rate = rec.custom_rate            
+            rec.conversion_rate = rec.custom_rate   
+            rec.credit2 = rec.credit / conversion_rate
+            rec.debit2 = rec.debit / conversion_rate
+
+ 
+
 
     def _inverse_conversion_rate(self):
         for rec in self:
