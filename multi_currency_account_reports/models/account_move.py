@@ -3,13 +3,19 @@ import logging
 _logger = logging.getLogger(__name__)
 
 class AccountMoveLine(models.Model):
-    _inherit = 'account.move.line'
+    _inherit = ['mail.thread', 'account.move.line']
 
-    company_currency_id2 = fields.Many2one(string='Second Company Currency', related='company_id.currency_id2',readonly=True, store=True)
-    conversion_rate = fields.Float(string='Conversion Rate', compute='_compute_conversion_rate', inverse='_inverse_conversion_rate')
-    custom_rate = fields.Float(string='Custom Rate', default=-1)
-    debit2 = fields.Monetary(string='Debit2', currency_field='company_currency_id2', default=0)
-    credit2 = fields.Monetary(string='Credit2', currency_field='company_currency_id2', default=0)
+    company_currency_id2 = fields.Many2one(string='Second Company Currency', related='company_id.currency_id2', readonly=True, store=True)
+    conversion_rate = fields.Float(
+        string='Conversion Rate',
+        compute='_compute_conversion_rate',
+        inverse='_inverse_conversion_rate',
+        store=True,
+        tracking=True,
+    )
+    custom_rate = fields.Float(string='Custom Rate', default=-1, tracking=True)
+    debit2 = fields.Monetary(string='Debit2', currency_field='company_currency_id2', default=0, tracking=True)
+    credit2 = fields.Monetary(string='Credit2', currency_field='company_currency_id2', default=0, tracking=True)
 
     @api.depends('amount_currency','date','currency_id','debit','credit','custom_rate')
     def _compute_conversion_rate(self):
