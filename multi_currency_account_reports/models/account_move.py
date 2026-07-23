@@ -3,7 +3,7 @@ import logging
 _logger = logging.getLogger(__name__)
 
 class AccountMoveLine(models.Model):
-    _inherit = ['mail.thread', 'account.move.line']
+    _inherit = 'account.move.line'
 
     company_currency_id2 = fields.Many2one(string='Second Company Currency', related='company_id.currency_id2', readonly=True, store=True)
     conversion_rate = fields.Float(
