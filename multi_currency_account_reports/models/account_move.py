@@ -1,6 +1,27 @@
-from odoo import fields, models, api
+from odoo import fields, models, api, _
+from odoo.exceptions import ValidationError
+from odoo.tools import float_compare
 import logging
 _logger = logging.getLogger(__name__)
+
+class AccountMove(models.Model):
+    _inherit = 'account.move'
+
+    def action_post(self):
+        self._check_debit2_credit2_balance()
+        return super().action_post()
+
+    def _check_debit2_credit2_balance(self):
+        for move in self:
+            move.line_ids._update_currency_values()
+            debit2_total = sum(line.debit2 for line in move.line_ids)
+            credit2_total = sum(line.credit2 for line in move.line_ids)
+            precision_digits = move.company_id.currency_id2.decimal_places or move.company_id.currency_id.decimal_places or 2
+            if float_compare(debit2_total, credit2_total, precision_digits=precision_digits) != 0:
+                raise ValidationError(_(
+                    "The total Debit2 must be equal to the total Credit2 before posting this account move."
+                ))
+
 
 class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
