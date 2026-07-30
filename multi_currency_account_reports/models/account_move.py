@@ -6,10 +6,10 @@ class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
     company_currency_id2 = fields.Many2one(string='Second Company Currency', related='company_id.currency_id2', readonly=True, store=True)
-    conversion_rate = fields.Float(string='Conversion Rate', store=True, tracking=True)
+    conversion_rate = fields.Float(string='Conversion Rate', store=True)
     custom_rate = fields.Float(string='Custom Rate', default=-1, tracking=True)
-    debit2 = fields.Monetary(string='Debit2', currency_field='company_currency_id2', default=0, store=True, tracking=True)
-    credit2 = fields.Monetary(string='Credit2', currency_field='company_currency_id2', default=0, store=True, tracking=True)
+    debit2 = fields.Monetary(string='Debit2', currency_field='company_currency_id2', default=0, store=True)
+    credit2 = fields.Monetary(string='Credit2', currency_field='company_currency_id2', default=0, store=True)
 
     @api.model_create_multi
     def create(self, vals_list):
