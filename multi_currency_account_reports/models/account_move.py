@@ -58,8 +58,8 @@ class AccountMoveLine(models.Model):
             if manual_conversion_rate is not None:
                 values['conversion_rate'] = manual_conversion_rate
                 values['custom_rate'] = manual_conversion_rate
-                values['debit2'] = rec.debit / manual_conversion_rate if manual_conversion_rate else 0
-                values['credit2'] = rec.credit / manual_conversion_rate if manual_conversion_rate else 0
+                values['debit2'] = rec.debit / manual_conversion_rate if manual_conversion_rate else rec.debit2
+                values['credit2'] = rec.credit / manual_conversion_rate if manual_conversion_rate else rec.credit2
             elif rec.custom_rate == -1:
                 conversion_rate = 1
                 main_currency = self.env.company.currency_id
@@ -103,8 +103,8 @@ class AccountMoveLine(models.Model):
                     values['conversion_rate'] = conversion_rate
             else:
                 values['conversion_rate'] = rec.custom_rate
-                values['credit2'] = rec.credit / rec.custom_rate if rec.custom_rate else 0
-                values['debit2'] = rec.debit / rec.custom_rate if rec.custom_rate else 0
+                values['credit2'] = rec.credit / rec.custom_rate if rec.custom_rate else rec.credi2
+                values['debit2'] = rec.debit / rec.custom_rate if rec.custom_rate else rec.debit2
 
             if values:
                 values_by_record[rec.id] = values
