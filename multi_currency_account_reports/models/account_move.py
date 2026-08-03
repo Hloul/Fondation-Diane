@@ -103,7 +103,7 @@ class AccountMoveLine(models.Model):
                     values['conversion_rate'] = conversion_rate
             else:
                 values['conversion_rate'] = rec.custom_rate
-                values['credit2'] = rec.credit / rec.custom_rate if rec.custom_rate else rec.credi2
+                values['credit2'] = rec.credit / rec.custom_rate if rec.custom_rate else rec.credit2
                 values['debit2'] = rec.debit / rec.custom_rate if rec.custom_rate else rec.debit2
 
             if values:
