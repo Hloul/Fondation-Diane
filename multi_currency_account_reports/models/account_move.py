@@ -36,7 +36,9 @@ class AccountMoveLine(models.Model):
     def create(self, vals_list):
         records = super().create(vals_list)
         if records:
-            records.with_context(skip_currency_recalc=True)._update_currency_values()
+            draft_records = records.filtered(lambda rec: not rec.move_id or rec.move_id.state == 'draft')
+            if draft_records:
+                draft_records.with_context(skip_currency_recalc=True)._update_currency_values()
         return records
 
     def write(self, vals):
@@ -44,7 +46,9 @@ class AccountMoveLine(models.Model):
         if not self.env.context.get('skip_currency_recalc') and any(
             field in vals for field in ['debit', 'credit', 'amount_currency', 'currency_id', 'custom_rate', 'conversion_rate', 'move_id']
         ):
-            self.with_context(skip_currency_recalc=True)._update_currency_values(vals.get('conversion_rate'))
+            draft_records = self.filtered(lambda rec: not rec.move_id or rec.move_id.state == 'draft')
+            if draft_records:
+                draft_records.with_context(skip_currency_recalc=True)._update_currency_values(vals.get('conversion_rate'))
         return result
 
     @api.onchange('debit', 'credit', 'amount_currency', 'currency_id', 'custom_rate', 'conversion_rate', 'move_id')
@@ -54,6 +58,9 @@ class AccountMoveLine(models.Model):
     def _update_currency_values(self, manual_conversion_rate=None):
         values_by_record = {}
         for rec in self:
+            if rec.move_id and rec.move_id.state != 'draft':
+                continue
+
             values = {}
             if manual_conversion_rate is not None:
                 values['conversion_rate'] = manual_conversion_rate
